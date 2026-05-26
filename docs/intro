@@ -1,0 +1,30 @@
+# About The Hackathon
+
+What started as “let’s just participate for fun” quickly turned into 24 hours of nonstop coding, wiring, debugging, caffeine, sensor failures, last-minute fixes, and somehow… a fully working prototype by the end of it.
+
+CropSense was built during a 24-hour hackathon where our team wanted to create something practical, impactful, and genuinely useful beyond just being another software-only project. Since agriculture continues to play such a major role in everyday life, we decided to focus on smart farming and crop health monitoring.
+
+The idea behind CropSense was simple:
+Can we build a low-cost system capable of monitoring environmental conditions and detecting plant stress in real time?
+
+To make that happen, we combined:
+- ESP32 based IoT monitoring
+- Environmental sensing
+- NIR-based leaf health detection
+- Real-time dashboard monitoring
+- Telegram alert integration
+- OLED live status display
+
+One of the biggest challenges was integrating both hardware and software within such a limited timeframe while ensuring the system remained stable enough for a live demo.
+
+Despite the sleep deprivation and debugging chaos at 3 AM, seeing the final system come alive — sensors responding, OLED updating, alerts triggering, and the dashboard working in real time — made the entire experience worth it.
+
+More than just a project, this hackathon became an incredible hands-on learning experience in:
+- Embedded systems
+- Sensor interfacing
+- IoT architecture
+- Rapid prototyping
+- Team collaboration
+- Real-time debugging under pressure
+
+And honestly, that’s what made the event memorable.
