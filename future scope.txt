@@ -1,0 +1,419 @@
+================================================================
+                        CROPSENSE
+         Detect Crop Disease Before Your Eyes Can
+            AI/ML × IoT × AgriTech — Hackathon Project
+                   Complete Detailed Report
+================================================================
+
+================================================================
+1. PROJECT OVERVIEW
+================================================================
+
+Project Name    : CropSense
+Tagline         : Detect crop disease before your eyes can
+Domains         : AI/ML + IoT + AgriTech
+Core Tech       : TinyML, NIR Spectroscopy, ESP32, WhatsApp API
+Target Region   : Rural India (Scalable Globally)
+Hackathon Build : MVP buildable in 24 to 36 hours
+
+================================================================
+2. PROBLEM STATEMENT
+================================================================
+
+What is happening right now:
+- Fungal or bacterial infection starts inside the leaf at cellular level.
+- Visible yellowing or spots appear only after 7 to 14 days of internal damage.
+- By the time a farmer sees it, 40 to 60% of that plant is already damaged.
+- Calling an agronomist costs Rs.500 to Rs.2000 per visit and takes days.
+- Lab testing: send sample, wait 1 to 2 weeks, get generic result.
+
+Scale of the Problem:
+----------------------------------------------------------
+Statistic                                  | Value
+----------------------------------------------------------
+Crop loss due to disease (India/year)      | ~Rs.90,000 crore
+Farmers with access to agronomist          | Less than 15%
+Average response time after symptom        | 3 to 7 days (too late)
+Small / marginal farmers in India          | 146 million
+----------------------------------------------------------
+
+Why it is rarely addressed:
+Existing solutions like drone imaging and satellite NDVI are expensive
+(Rs.5 to 15 lakh), need internet, and give field-level data — not
+plant-level early warning.
+
+================================================================
+3. SOLUTION ARCHITECTURE
+================================================================
+
+[Leaf Clip Sensor]
+      |  (NIR + visible light readings)
+      v
+[ESP32 Microcontroller]
+      |  (runs TinyML model on-device)
+      v
+[Disease Classification]
+      |
+      +--> Healthy        --> Green LED blink, no alert
+      |
+      +--> Stress Detected -->
+                 |
+                 v
+           [GSM Module / WiFi]
+                 |
+                 v
+           [WhatsApp Alert to Farmer]
+           "Your tomato shows Early Late Blight.
+            Apply Mancozeb 2g/litre spray today."
+
+================================================================
+4. HARDWARE COMPONENTS
+================================================================
+
+4.1 Core Microcontroller Unit
+----------------------------------------------------------
+Component        | Specification    | Purpose              | Cost (INR)
+----------------------------------------------------------
+ESP32 Dev Board  | ESP32-WROOM-32   | Main brain+WiFi+ML   | Rs.350-500
+Micro USB Cable  | Data type        | Flash code           | Rs.50-100
+Breadboard       | 830 points       | Circuit prototyping  | Rs.80-150
+Jumper Wires     | M-M + M-F set    | Connections          | Rs.50-100
+----------------------------------------------------------
+
+4.2 Optical Sensing Unit (Leaf Clip)
+----------------------------------------------------------
+Component          | Specification      | Purpose                    | Cost
+----------------------------------------------------------
+NIR LED            | 850 nm             | Emits NIR into leaf        | Rs.30-60
+Red LED            | 660 nm             | Chlorophyll measurement    | Rs.10-20
+BPW34 Photodiode   | Silicon            | Detects transmitted light  | Rs.40-80
+ADS1115 Module     | 16-bit 4-ch ADC    | Analog to digital          | Rs.80-150
+10k Ohm Resistors  | x4                 | LED current limiting       | Rs.5-10
+Black Shrink Tube  | Any diameter       | Block external light       | Rs.20-40
+----------------------------------------------------------
+
+4.3 Environmental Sensors
+----------------------------------------------------------
+Component              | Specification  | Purpose                    | Cost
+----------------------------------------------------------
+DHT22                  | Temp+Humidity  | Environmental ML features  | Rs.150-200
+Soil Moisture Sensor   | Resistive      | Soil condition input       | Rs.50-80
+LDR                    | GL5528         | Ambient light compensation | Rs.10-20
+----------------------------------------------------------
+
+4.4 Communication Module
+----------------------------------------------------------
+Component      | Specification  | Purpose                      | Cost
+----------------------------------------------------------
+SIM800L GSM    | Quad-band GSM  | WhatsApp alert without WiFi  | Rs.200-350
+SIM Card       | 2G/4G data     | Network for alerts           | Rs.20+recharge
+GSM Antenna    | Spring type    | Better field signal          | Rs.30-50
+----------------------------------------------------------
+
+4.5 Power Unit
+----------------------------------------------------------
+Component          | Specification   | Purpose                          | Cost
+----------------------------------------------------------
+Li-Po Battery      | 3.7V 2000mAh    | Field power source               | Rs.150-250
+TP4056 Module      | With protection | Charging + protection            | Rs.30-60
+Mini Solar Panel   | 6V 1W optional  | Continuous outdoor power         | Rs.150-250
+----------------------------------------------------------
+
+4.6 Output Indicators
+----------------------------------------------------------
+Component           | Purpose              | Cost
+----------------------------------------------------------
+Green LED 5mm       | Healthy status       | Rs.5
+Yellow LED 5mm      | Warning              | Rs.5
+Red LED 5mm         | Disease alert        | Rs.5
+Active Buzzer 5V    | Audio alert          | Rs.20-30
+0.96" OLED I2C      | Show readings        | Rs.150-200
+----------------------------------------------------------
+
+Total Hardware Cost:
+----------------------------------------------------------
+Category               | Cost Range
+----------------------------------------------------------
+Core MCU Unit          | Rs.530  to Rs.850
+Optical Sensing Unit   | Rs.200  to Rs.370
+Environmental Sensors  | Rs.210  to Rs.300
+Communication Module   | Rs.250  to Rs.420
+Power Unit             | Rs.330  to Rs.560
+Output Indicators      | Rs.185  to Rs.245
+TOTAL (Full Build)     | Rs.1700 to Rs.2745
+TOTAL (Hackathon Demo) | Rs.1200 to Rs.1800
+----------------------------------------------------------
+
+================================================================
+5. AI / ML COMPONENT
+================================================================
+
+Model Specifications:
+----------------------------------------------------------
+Model Type      : Decision Tree / Small Neural Network
+Framework       : TensorFlow Lite for Microcontrollers
+Runs On         : ESP32 — no internet required
+Input Features  : NIR ratio, RED ratio, Temperature, Humidity, Time-of-day
+Output Classes  : Healthy / Fungal Stress / Bacterial Stress / Nutrient Deficiency
+----------------------------------------------------------
+
+NDVI Formula Used:
+NDVI = (NIR - RED) / (NIR + RED)
+
+Healthy plant   -->  NDVI: 0.6 to 0.9
+Early stress    -->  NDVI: 0.3 to 0.6   <-- CropSense detects HERE
+Visible damage  -->  NDVI: below 0.3    <-- Traditional farming detects here
+
+How Optical Sensing Works:
+    NIR LED (850nm)
+        | light
+   [  L E A F  ]
+        | transmitted light
+    Photodiode
+        |
+    ADS1115 (ADC)
+        |
+    ESP32 reads voltage ratio
+
+Healthy leaf  --> absorbs specific NIR % --> known ratio
+Diseased leaf --> cell structure changes  --> ratio shifts
+
+Training Pipeline:
+Step 1: Collect Dataset
+        -> PlantVillage dataset (54,000+ labeled leaf images)
+        -> Convert to spectral signature equivalents
+
+Step 2: Feature Extraction
+        -> Extract NDVI, chlorophyll index, water content index
+
+Step 3: Train Model (Python + sklearn / TensorFlow)
+        -> Keep model under 50KB to fit in ESP32 flash
+
+Step 4: Convert to TFLite
+        -> tflite_convert -> .tflite model file
+
+Step 5: Deploy to ESP32
+        -> Flash model using Arduino IDE / PlatformIO
+
+Model Performance Targets:
+----------------------------------------------------------
+Metric                    | Target
+----------------------------------------------------------
+Accuracy                  | > 85%
+False Positive Rate       | < 10%
+Inference Time on ESP32   | < 200 ms
+Model Size                | < 45 KB
+----------------------------------------------------------
+
+================================================================
+6. WHATSAPP ALERT SYSTEM
+================================================================
+
+Why WhatsApp (not a custom app):
+- 90%+ rural smartphone users already have WhatsApp.
+- No new app to install, no login required.
+- Works reliably on 2G networks.
+- Supports regional language text messages.
+
+Integration Method:
+ESP32 -> WiFi/GSM -> Twilio WhatsApp API / WhatsApp Business Cloud API
+                          |
+                          v
+               Farmer WhatsApp Message:
+
+CropSense Alert -- Node #3 (North Field)
+Crop       : Tomato
+Status     : Early Fungal Stress Detected
+Confidence : 87%
+
+Action : Apply Mancozeb @ 2g / litre
+Spray  : Morning or Evening
+Days before visible damage : ~8 to 10 days
+
+Reply HELP for agronomist contact.
+
+Language Support:
+- English
+- Kannada
+- Hindi
+- Tamil, Telugu (extensible via Google Translate API)
+
+================================================================
+7. SYSTEM ARCHITECTURE (Full Stack)
+================================================================
+
++--------------------------------------------------+
+|                  FIELD LAYER                     |
+|  [Leaf Clip Node 1] [Node 2] [Node 3]            |
+|     ESP32 + Sensors + TinyML on each node        |
++---------------------+----------------------------+
+                      | WiFi / LoRa / GSM
++---------------------v----------------------------+
+|               GATEWAY / CLOUD                    |
+|  Raspberry Pi Gateway  OR  AWS IoT Core          |
+|  - Collects readings from all nodes              |
+|  - Stores time-series data                       |
+|  - Runs advanced cloud ML (optional)             |
++---------------------+----------------------------+
+                      |
++---------------------v----------------------------+
+|            ALERT + DASHBOARD                     |
+|  WhatsApp API    -> Farmer Alert                 |
+|  Web Dashboard   -> Agronomist / NGO view        |
+|  Data Export     -> Insurance / Govt API         |
++--------------------------------------------------+
+
+================================================================
+8. COMPLETE SOFTWARE STACK
+================================================================
+
+8.1 Microcontroller Programming:
+----------------------------------------------------------
+Software / Library       | Purpose
+----------------------------------------------------------
+Arduino IDE 2.x          | Flash code to ESP32
+ESP32 Board Package      | ESP32 support in Arduino
+Adafruit ADS1X15         | ADS1115 ADC sensor readings
+DHT Sensor Library       | Temperature and humidity
+TensorFlowLite_ESP32     | Run TinyML model on chip
+ArduinoJson              | Parse JSON responses
+WiFi.h / HTTPClient.h    | Built-in ESP32 networking
+----------------------------------------------------------
+
+8.2 Machine Learning Stack:
+----------------------------------------------------------
+Tool                     | Purpose
+----------------------------------------------------------
+Python 3.10+             | Base ML language
+TensorFlow 2.x           | Train the neural network
+TFLite Converter         | Convert model for ESP32
+scikit-learn             | Preprocessing and metrics
+NumPy + Pandas           | Dataset handling
+Google Colab             | Free cloud GPU for training
+PlantVillage Dataset     | 54,000+ labeled plant images
+----------------------------------------------------------
+
+8.3 Backend / Cloud:
+----------------------------------------------------------
+Tool                     | Purpose
+----------------------------------------------------------
+Python + Flask           | API server for ESP32 data
+Firebase Realtime DB     | Time-series sensor storage
+Render / Railway         | Host Flask backend (free tier)
+Twilio WhatsApp API      | Send WhatsApp alerts
+Ngrok                    | Expose local server in hackathon
+----------------------------------------------------------
+
+8.4 Frontend Dashboard:
+----------------------------------------------------------
+Tool                     | Purpose
+----------------------------------------------------------
+HTML + CSS + JavaScript  | Dashboard structure
+Chart.js                 | NDVI trend graphs
+Leaflet.js               | Farm map with node markers
+Bootstrap 5              | Responsive UI layout
+VS Code + Live Server    | Development environment
+----------------------------------------------------------
+
+8.5 Communication / API Services:
+----------------------------------------------------------
+Service                  | Purpose                  | Cost
+----------------------------------------------------------
+Twilio Account           | WhatsApp API access      | Free trial
+WhatsApp Business API    | Alternate (Meta direct)  | Free low volume
+Google Translate API     | Regional language alerts | Free tier
+----------------------------------------------------------
+
+8.6 Dev and Collaboration Tools:
+----------------------------------------------------------
+Tool         | Purpose
+----------------------------------------------------------
+Git + GitHub | Version control, team collaboration
+Postman      | Test API endpoints
+Fritzing     | Draw wiring diagrams
+draw.io      | Architecture diagrams for pitch
+Canva        | Pitch deck design
+----------------------------------------------------------
+
+================================================================
+9. 24-HOUR BUILD PLAN
+================================================================
+
+----------------------------------------------------------
+Time Block   | Task                                | Owner
+----------------------------------------------------------
+0  to 2 hrs  | Hardware assembly, sensor wiring    | Hardware Eng.
+2  to 5 hrs  | ESP32 calibration, basic readings   | Hardware Eng.
+5  to 9 hrs  | ML model training + TFLite convert  | ML Engineer
+9  to 12 hrs | Deploy model to ESP32, test classify| ML Engineer
+12 to 16 hrs | WhatsApp API + alert messages       | Backend Dev
+16 to 20 hrs | Dashboard frontend + backend        | Frontend Dev
+20 to 22 hrs | Full system integration test        | All
+22 to 24 hrs | Demo prep, pitch deck, rehearsal    | All
+----------------------------------------------------------
+
+================================================================
+10. RECOMMENDED TEAM (4 MEMBERS)
+================================================================
+
+----------------------------------------------------------
+Role                  | Responsibility
+----------------------------------------------------------
+Hardware Engineer     | Build leaf clip, wire ESP32, calibrate sensors
+ML Engineer           | Train TinyML, convert TFLite, flash to ESP32
+Backend Developer     | Cloud pipeline, WhatsApp API, database
+Frontend + Presenter  | Dashboard UI, pitch deck, demo video
+----------------------------------------------------------
+
+================================================================
+11. BUSINESS AND SCALE POTENTIAL
+================================================================
+
+----------------------------------------------------------
+Stage           | Plan
+----------------------------------------------------------
+Hackathon MVP   | 1 node, 1 crop, demo with pre-recorded data
+Pilot 3 months  | 10 farms, 3 crops, live field testing
+Startup Phase   | Lease model Rs.200/month per node to farmer
+Scale           | Partner with FPOs, agri departments, insurers
+Revenue Model   | Hardware lease + SaaS dashboard + data licensing
+----------------------------------------------------------
+
+Key Impact Numbers:
+- Addressable market: 146 million small farmers in India alone
+- Crop disease loss in India: ~Rs.90,000 crore per year
+- Each prevented disease event saves Rs.20,000 to Rs.2 lakh per farmer
+- Strong alignment with government Digital Agriculture Mission
+
+================================================================
+12. WHY JUDGES WILL LOVE IT
+================================================================
+
+- Real hardware demo — not just a slide presentation
+- TinyML on microcontroller — demonstrates deep technical skill
+- Works without internet — genuinely solves rural connectivity problem
+- WhatsApp = zero adoption barrier for farmers
+- Solves a problem costing India Rs.90,000 crore per year
+- Under Rs.1500 per node — genuinely affordable at scale
+- Clear startup pivot path with real revenue model
+
+================================================================
+13. WHERE TO BUY COMPONENTS IN INDIA
+================================================================
+
+----------------------------------------------------------
+Platform              | Best For
+----------------------------------------------------------
+Robu.in               | ESP32, sensors, modules — fast delivery
+Electronicscomp.com   | NIR LEDs, photodiodes, ADS1115
+Amazon India          | DHT22, OLED, breadboard kits
+SP Road, Bangalore    | Same-day pickup, cheapest rates
+Flipkart              | Backup option
+----------------------------------------------------------
+
+Tip: SP Road (Chickpete area, Bangalore) is your best option
+for same-day component sourcing before a hackathon.
+
+================================================================
+       CropSense — Hackathon Report | AI/ML x IoT x AgriTech
+================================================================
